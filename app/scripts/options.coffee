@@ -142,6 +142,8 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
                         $scope.clearMarked $scope.selected
                 when 73 #i
                     $state.transitionTo 'main.index'
+                when 86 #v
+                    chrome.tabs.create {url: $scope.selected.url} if $scope.selected?
     document.addEventListener 'keydown', keybindListenerExtra, true
 
     $scope.$on '$stateChangeStart', ->
