@@ -26,7 +26,7 @@ app.config ['$stateProvider', '$urlRouterProvider', '$compileProvider', ($stateP
 
 asyncHistory = ['$rootScope', '$q', ($rootScope, $q) ->
     deferred = $q.defer()
-    chrome.history.search {text: '', maxResults: 100000}, (results) ->
+    chrome.history.search {text: '', maxResults: 100000, startTime: 0}, (results) ->
         $rootScope.$apply ->
             deferred.resolve results
     return deferred.promise
@@ -97,8 +97,10 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
     $scope.cards = cards = _.uniq $scope.bundles[host], false, (card) -> card.url
 
     $scope.current = null
-    $scope.setCurrent = (card) -> $scope.current = card
     $scope.getCurrentUrl = (card) -> $sce.trustAsResourceUrl if $scope.current? then $scope.current.url else ''
+
+    $scope.open = (card) ->
+        $scope.current = $scope.selected = card
 
     filterCards = ->
         _cards = cards
@@ -128,7 +130,7 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
     $scope.acceptableTitle = $scope.acceptableTitles[$scope.host]
 
     keybindListener = keybind $scope, 'cards', ->
-        $scope.setCurrent $scope.selected if $scope.selected?
+        $scope.current = $scope.selected if $scope.selected?
     keybindListenerExtra = (event) ->
         return if event.target.tagName.toLowerCase() != 'body'
         $scope.$apply ->
