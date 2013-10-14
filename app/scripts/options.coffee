@@ -94,7 +94,7 @@ app.controller 'indexCtrl', ['$state', '$scope', 'keybind', ($state, $scope, key
 app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybind', ($state, $stateParams, $scope, $sce, keybind) ->
     {host, sortBy} = $stateParams
     $scope.host = host
-    $scope.cards = cards = _.uniq $scope.bundles[host], false, (card) -> card.url
+    $scope.cards = cards = _.uniq $scope.bundles[host], false, (card) -> card.title or card.url
 
     $scope.current = null
     $scope.getCurrentUrl = (card) -> $sce.trustAsResourceUrl if $scope.current? then $scope.current.url else ''
@@ -133,17 +133,17 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
         $scope.current = $scope.selected if $scope.selected?
     keybindListenerExtra = (event) ->
         return if event.target.tagName.toLowerCase() != 'body'
-        $scope.$apply ->
-            switch event.which
-                when 77 #m
+        switch event.which
+            when 77 #m
+                $scope.$apply ->
                     if not $scope.isMarked $scope.selected
                         $scope.setMarked $scope.selected
                     else
                         $scope.clearMarked $scope.selected
-                when 73 #i
-                    $state.transitionTo 'main.index'
-                when 86 #v
-                    chrome.tabs.create {url: $scope.selected.url} if $scope.selected?
+            when 73 #i
+                $state.transitionTo 'main.index'
+            when 86 #v
+                chrome.tabs.create {url: $scope.selected.url} if $scope.selected?
     document.addEventListener 'keydown', keybindListenerExtra, true
 
     $scope.$on '$stateChangeStart', ->
