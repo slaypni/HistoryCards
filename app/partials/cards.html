@@ -18,7 +18,7 @@
         <li class="card"
             ng-class="(card == selected ? 'selected ': '') + (isMarked(card) ? 'marked ' : '')"
             ng-repeat="card in cards" 
-            ng-click="open(card)"
+            ng-click="onCardClick(card, $event)"
             tooltip="{{card.url}}" tooltip-placement="right" tooltip-popup-delay="1000">
           <div class="row">
             <div class="col-lg-12">

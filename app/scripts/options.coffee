@@ -50,13 +50,13 @@ app.controller 'mainCtrl', ['$state', '$scope', 'history', ($state, $scope, hist
     
     markedUrls = localStorage.getItem 'markedUrls'
     markedUrls = JSON.parse if markedUrls? then markedUrls else '[]'
-    $scope.setMarked = (card) ->
+    setMarked = (card) ->
         index = _.indexOf markedUrls, card.url, true
         return if index != -1
         index = _.sortedIndex markedUrls, card.url
         markedUrls.splice index, 0, card.url
         localStorage.setItem 'markedUrls', JSON.stringify markedUrls
-    $scope.clearMarked = (card) ->
+    clearMarked = (card) ->
         index = _.indexOf markedUrls, card.url, true
         return if index == -1
         markedUrls.splice index, 1
@@ -64,6 +64,11 @@ app.controller 'mainCtrl', ['$state', '$scope', 'history', ($state, $scope, hist
     $scope.isMarked = (card) ->
         index = _.indexOf markedUrls, card.url, true
         return if index != -1 then true else false
+    $scope.toggleMarked = (card) ->
+        if not $scope.isMarked card
+            setMarked card
+        else
+            clearMarked card
 
     acceptableUrls = localStorage.getItem 'acceptableUrls'
     $scope.acceptableUrls = JSON.parse if acceptableUrls then acceptableUrls else '{}'
@@ -99,7 +104,15 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
     $scope.current = null
     $scope.getCurrentUrl = (card) -> $sce.trustAsResourceUrl if $scope.current? then $scope.current.url else ''
 
-    $scope.open = (card) ->
+    $scope.onCardClick = (card, event) ->
+        if event.metaKey or event.ctrlKey
+            chrome.tabs.create {url: card.url}
+        else if event.altKey
+            $scope.toggleMarked card
+        else
+            open card
+
+    open = (card) ->
         $scope.current = $scope.selected = card
 
     filterCards = ->
@@ -136,10 +149,7 @@ app.controller 'cardsCtrl', ['$state', '$stateParams', '$scope', '$sce', 'keybin
         switch event.which
             when 77 #m
                 $scope.$apply ->
-                    if not $scope.isMarked $scope.selected
-                        $scope.setMarked $scope.selected
-                    else
-                        $scope.clearMarked $scope.selected
+                    $scope.toggleMarked $scope.selected
             when 73 #i
                 $state.transitionTo 'main.index'
             when 86 #v
